@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>InvisiBits Steganography Lab</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>InvisiBits</h1>
+        <p class="tagline">Hide, detect, and reveal covert messages inside media using classic LSB tricks.</p>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2>Encode Text into an Image</h2>
+            <form action="/encode-image" method="post" enctype="multipart/form-data">
+                <label>Cover image (PNG or JPG, ≤5MB)
+                    <input type="file" name="image" accept="image/png,image/jpeg" required>
+                </label>
+                <label>Secret message
+                    <textarea name="message" rows="4" required></textarea>
+                </label>
+                <label>Password (optional)
+                    <input type="password" name="password" placeholder="Leave empty for no lock">
+                </label>
+                <label class="option-row">
+                    <input type="checkbox" name="disable_compression">
+                    <span>Disable compression for testing raw payload size (results in larger embeds).</span>
+                </label>
+                <button type="submit">Encode & Download image</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Decode Text from an Image</h2>
+            <form action="/decode-image" method="post" enctype="multipart/form-data">
+                <label>Stego image (PNG or JPG, ≤5MB)
+                    <input type="file" name="image" accept="image/png,image/jpeg" required>
+                </label>
+                <label>Password (if required)
+                    <input type="password" name="password" placeholder="Enter password used for encoding">
+                </label>
+                <button type="submit">Decode message</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Steganography Detection</h2>
+            <form id="detect-form" action="/detect-image" method="post" enctype="multipart/form-data">
+                <label>Suspect image (PNG or JPG, ≤5MB)
+                    <input type="file" name="image" accept="image/png,image/jpeg" required>
+                </label>
+                <button type="submit">Analyze LSB pattern</button>
+            </form>
+            <p class="note">We compare LSB balance & transitions to flag abnormal noise introduced by hidden data.</p>
+            <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="card">
+            <h2>Audio Steganography</h2>
+            <div class="grid">
+                <form action="/encode-audio" method="post" enctype="multipart/form-data">
+                    <h3>Encode</h3>
+                    <label>Cover audio (.wav, ≤10MB)
+                        <input type="file" name="audio" accept="audio/wav" required>
+                    </label>
+                    <label>Secret message
+                        <textarea name="message" rows="3" required></textarea>
+                    </label>
+                    <label>Password (optional)
+                        <input type="password" name="password">
+                    </label>
+                    <label class="option-row">
+                        <input type="checkbox" name="disable_compression">
+                        <span>Disable compression for testing raw payload size.</span>
+                    </label>
+                    <button type="submit">Encode WAV</button>
+                </form>
+                <form action="/decode-audio" method="post" enctype="multipart/form-data">
+                    <h3>Decode</h3>
+                    <label>Stego audio (.wav, ≤10MB)
+                        <input type="file" name="audio" accept="audio/wav" required>
+                    </label>
+                    <label>Password (if required)
+                        <input type="password" name="password">
+                    </label>
+                    <button type="submit">Decode WAV</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Built for digital forensics.</p>
+    </footer>
+
+    <script>
+        const detectForm = document.getElementById('detect-form');
+        const toast = document.getElementById('toast');
+
+        function showToast(message, isError = false) {
+            if (!toast) return;
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+            toast.classList.toggle('error', isError);
+        }
+
+        detectForm?.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(detectForm);
+            showToast('Analyzing image…');
+            try {
+                const response = await fetch('/detect-image', {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'fetch' },
+                    body: formData
+                });
+                const data = await response.json();
+                if (!response.ok || !data.ok) {
+                    throw new Error(data?.message || 'Detection failed. Try another image.');
+                }
+                showToast(data.message);
+            } catch (err) {
+                showToast(err.message, true);
+            }
+        });
+    </script>
+</body>
+</html>
