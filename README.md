@@ -2,6 +2,9 @@
 
 A tiny Flask app that demonstrates practical digital forensics workflows for images and audio. It lets you encode, decode, and detect LSB steganography in PNG/JPG pictures or WAV audio, adds optional password protection, compresses text so longer payloads fit, and delivers decoded messages as downloadable `.txt` files.
 
+## Author
+- Markus Stamm
+
 ## Features
 - **Image steganography**: LSB encoder/decoder for PNG and JPG (≤5 MB) with automatic `_steg` filename suffix.
 - **Audio steganography**: Embed/recover text inside 8/16-bit WAV files (≤10 MB).
