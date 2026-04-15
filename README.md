@@ -5,6 +5,10 @@ A tiny Flask app that demonstrates practical digital forensics workflows for ima
 ## Author
 - Markus Stamm
 
+## Educational Use Only
+
+This project is for education and defensive learning only. Use it to understand steganography and forensic limits, not to hide harmful content or bypass rules.
+
 ## Features
 - **Image steganography**: LSB encoder/decoder for PNG and JPG (≤5 MB) with automatic `_steg` filename suffix.
 - **Audio steganography**: Embed/recover text inside 8/16-bit WAV files (≤10 MB).
